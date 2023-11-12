@@ -15,7 +15,7 @@ async function goToDinoWebpage(page: Page) {
 
   let dinoDB: Promise<DinosaurObject>[] = [];
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < dinoNames.length; i++) {
     console.log(`Navigating to and scraping ${dinoNames[i]}...`);
 
     await Promise.all([
