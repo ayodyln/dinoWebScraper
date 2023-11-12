@@ -1,49 +1,64 @@
+import fs from "fs";
 import puppeteer from "puppeteer";
-import { delay } from "./lib";
+import { navigateCookiesPage, goToDinoWebpage } from "./lib";
+
+const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html`;
 
 (async () => {
-  // Launch the browser and open a new blank page
-  const browser = await puppeteer.launch({ headless: true });
+  let browser;
 
-  if (!browser) return;
+  try {
+    generateOutDir();
 
-  const page = await browser.newPage();
-  await page.goto(
-    "https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html"
-  );
-  await page.setViewport({ width: 1080, height: 1024 });
-  const pageTitle = await page.title();
-  console.log(pageTitle);
-  await page.screenshot({ path: "imgs/1.png" });
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1080, height: 1024 });
 
-  // ? Navigate Cookies Prompts
-  const [cookiesPageRes] = await Promise.all([
-    page.waitForNavigation(),
-    page.click(`a[href="/about-us/cookie-preferences.html"]`), // Clicking the link will indirectly cause a navigation
-  ]);
-  await page.screenshot({ path: "imgs/2.png" }); // The promise resolves after navigation has finished
+    const res = await page.goto(url);
 
-  // ! Accept Cookies (F yo cookies)
-  const saveCookiesBtn = await page.waitForSelector('button[type="submit"]');
-  await saveCookiesBtn?.click();
-  await page.screenshot({ path: "imgs/3.png" });
+    if (!res?.ok()) {
+      console.log(`Error navigating to webpage: ${url}`);
+      process.exit(1);
+    } else console.log(`Navigated to webpage: ${await page.title()}`);
 
-  // Waiting for page load....
-  await delay(2000);
-  await page.screenshot({ path: "imgs/4.png" });
+    await page.screenshot({ path: "outDir/bot/1.png" });
 
-  // back to top of cookies page
-  const backToTop = await page.waitForSelector(
-    'a[data-return-to-previous="true"]'
-  );
-  const [_] = await Promise.all([page.waitForNavigation(), backToTop?.click()]);
-  await page.screenshot({ path: "imgs/5.png" });
+    await navigateCookiesPage(page);
 
-  const dinoNames = await page.$$eval(
-    `li.dinosaurfilter--dinosaur.dinosaurfilter--all-list > a > p`,
-    (dino) => dino.map((d) => d.textContent.replace(/\s/g, ""))
-  );
+    const dinoDB = await Promise.all(await goToDinoWebpage(page));
 
-  // ! End of Bot
-  await browser.close();
+    if (dinoDB.length > 0) {
+      console.log(`Done!`);
+      console.log("Writing to file...");
+
+      if (!fs.existsSync(`./outDir/bot/dinos.json`)) {
+        fs.writeFileSync(
+          `./outDir/bot/result/dinoDB.json`,
+          JSON.stringify(dinoDB, null, 2)
+        );
+      }
+
+      console.log(`Generated dinoDB.json!, Goodbye! 🦕`);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await browser?.close();
+  }
 })();
+
+function generateOutDir() {
+  const paths = {
+    outDir: `./outDir`,
+    botImgs: `./outDir/bot`,
+    dinoImgs: `./outDir/bot/dinos`,
+    resulte: `./outDir/bot/result`,
+  };
+
+  for (const path in paths) {
+    if (!fs.existsSync(paths[path])) {
+      console.log(`Creating ${paths[path]}`);
+      fs.mkdirSync(paths[path]);
+    }
+  }
+}
