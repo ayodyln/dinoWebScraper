@@ -2,18 +2,14 @@ import fs from "fs";
 import puppeteer from "puppeteer";
 import { navigateCookiesPage, goToDinoWebpage, delay } from "./lib";
 
-
 const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html`;
 
 (async () => {
   let browser;
+  let recorder;
 
   try {
     generateOutDir();
-
-    chalkAnimation.rainbow("Lorem ipsum dolor sit amet");
-
-    await delay(2000);
 
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -26,7 +22,7 @@ const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html
       process.exit(1);
     } else console.log(`Navigated to webpage: ${await page.title()}`);
 
-    await page.screenshot({ path: "outDir/bot/1.png" });
+    recorder = await page.screencast({ path: "outDir/recording.webm" });
 
     await navigateCookiesPage(page);
 
@@ -38,7 +34,7 @@ const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html
 
       if (!fs.existsSync(`./outDir/bot/dinos.json`)) {
         fs.writeFileSync(
-          `./outDir/bot/result/dinoDB.json`,
+          `./outDir/bot/dinoDB.json`,
           JSON.stringify(dinoDB, null, 2)
         );
       }
@@ -49,15 +45,14 @@ const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html
     console.error(error);
   } finally {
     await browser?.close();
+    await recorder.stop();
   }
 })();
 
 function generateOutDir() {
   const paths = {
     outDir: `./outDir`,
-    botImgs: `./outDir/bot`,
-    dinoImgs: `./outDir/bot/dinos`,
-    resulte: `./outDir/bot/result`,
+    bot: `./outDir/bot`,
   };
 
   for (const path in paths) {

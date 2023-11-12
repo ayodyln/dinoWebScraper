@@ -1,6 +1,7 @@
 type DinosaurObject = {
   id: string;
   name: string;
+  img: string[];
   pronounciation: string;
   name_meaning: string;
   type: string;
