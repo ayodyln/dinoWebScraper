@@ -15,11 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const lib_1 = require("./lib");
+const chalk_animation_1 = __importDefault(require("chalk-animation"));
 const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html`;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     let browser;
     try {
         generateOutDir();
+        chalk_animation_1.default.rainbow("Lorem ipsum dolor sit amet");
+        yield (0, lib_1.delay)(2000);
         const browser = yield puppeteer_1.default.launch({ headless: true });
         const page = yield browser.newPage();
         yield page.setViewport({ width: 1080, height: 1024 });

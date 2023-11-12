@@ -21,7 +21,7 @@ function goToDinoWebpage(page) {
         if (dinoNames)
             console.log(`Collected ${dinoNames.length} Dino Names...`);
         let dinoDB = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < dinoNames.length; i++) {
             console.log(`Navigating to and scraping ${dinoNames[i]}...`);
             yield Promise.all([
                 page.waitForNavigation(),
@@ -38,49 +38,44 @@ function goToDinoWebpage(page) {
 exports.goToDinoWebpage = goToDinoWebpage;
 function grabDinoInfo(page, dino) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield page.evaluate(({ id, dino }) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-            const pronounciation = (_a = document.querySelector("dd.dinosaur--pronunciation")) === null || _a === void 0 ? void 0 : _a.textContent;
-            const name_meaning = (_b = document
-                .querySelector("dd.dinosaur--meaning")) === null || _b === void 0 ? void 0 : _b.textContent.replace(/'/g, "");
-            const type = (_c = document
-                .querySelector("dl[data-dino-length] > dd > a")) === null || _c === void 0 ? void 0 : _c.textContent.replace(/\s/g, "");
-            const diet = (_d = document
-                .querySelector(`dl.dinosaur--info.dinosaur--list > dd:first-of-type > a`)) === null || _d === void 0 ? void 0 : _d.textContent.replace(/\s/g, "");
-            const length = (_e = document.querySelector("dl[data-dino-length] > dd:last-child")) === null || _e === void 0 ? void 0 : _e.textContent;
-            const period = (_f = document.querySelector("dl.dinosaur--info.dinosaur--list > dd:nth-of-type(2) > a")) === null || _f === void 0 ? void 0 : _f.textContent;
-            const epoch = (_g = document
-                .querySelector("dl.dinosaur--info.dinosaur--list > dd:nth-of-type(2)")) === null || _g === void 0 ? void 0 : _g.textContent.split(",")[1].trim();
-            const location = (_h = document
-                .querySelector("dl.dinosaur--info.dinosaur--list > dd:last-child")) === null || _h === void 0 ? void 0 : _h.textContent.replace(/\t|\n/g, "");
-            const description = (_j = document
-                .querySelector("dinosaur--content-container layout-row")) === null || _j === void 0 ? void 0 : _j.textContent.replace(/\t|\n/g, "");
-            const taxonomy = document
-                .querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(1)")
-                .textContent.split(", ");
-            const named_by = (_k = document.querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(2)")) === null || _k === void 0 ? void 0 : _k.textContent;
-            const type_species = (_l = document.querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(3)")) === null || _l === void 0 ? void 0 : _l.textContent;
+        return yield page.evaluate(({ id, dino, page }) => {
+            const pronounciation = document.querySelector("dd.dinosaur--pronunciation");
+            const name_meaning = document.querySelector("dd.dinosaur--meaning");
+            const type = document.querySelector("dl[data-dino-length] > dd > a");
+            const diet = document.querySelector(`dl.dinosaur--info.dinosaur--list > dd:first-of-type > a`);
+            const length = document.querySelector("dl[data-dino-length] > dd:last-child");
+            const period = document.querySelector("dl.dinosaur--info.dinosaur--list > dd:nth-of-type(2) > a");
+            const epoch = document.querySelector("dl.dinosaur--info.dinosaur--list > dd:nth-of-type(2)");
+            const location = document.querySelector("dl.dinosaur--info.dinosaur--list > dd:last-child");
+            let description = document.querySelector("dinosaur--content-container layout-row");
+            const taxonomy = document.querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(1)");
+            const named_by = document.querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(2)");
+            const type_species = document.querySelector("dl.dinosaur--taxonomy.dinosaur--list > dd:nth-of-type(3)");
             return {
                 id,
                 name: dino,
-                pronounciation,
-                name_meaning,
-                type,
-                diet,
-                length,
+                pronounciation: pronounciation ? pronounciation.textContent : null,
+                name_meaning: name_meaning
+                    ? name_meaning.textContent.replace(/'/g, "")
+                    : null,
+                type: type ? type.textContent.replace(/\s/g, "") : null,
+                diet: diet ? diet.textContent.replace(/\s/g, "") : null,
+                length: length ? length.textContent : null,
                 era: {
-                    period,
-                    epoch,
+                    period: period ? period.textContent : null,
+                    epoch: epoch ? epoch.textContent.split(",")[1] : null,
                 },
-                location,
-                description,
+                location: location ? location.textContent.replace(/\t|\n/g, "") : null,
+                description: description
+                    ? description.textContent.replace(/\t|\n/g, "")
+                    : null,
                 taxonomic_details: {
-                    taxonomy,
-                    named_by,
-                    type_species,
+                    taxonomy: taxonomy ? taxonomy.textContent.split(", ") : null,
+                    named_by: named_by ? named_by.textContent : null,
+                    type_species: type_species ? type_species.textContent : null,
                 },
             };
-        }, { id: (0, uuid_1.v4)(), dino });
+        }, { id: (0, uuid_1.v4)(), dino, page });
     });
 }
 /*

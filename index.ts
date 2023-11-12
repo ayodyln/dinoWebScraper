@@ -1,6 +1,7 @@
 import fs from "fs";
 import puppeteer from "puppeteer";
-import { navigateCookiesPage, goToDinoWebpage } from "./lib";
+import { navigateCookiesPage, goToDinoWebpage, delay } from "./lib";
+
 
 const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html`;
 
@@ -9,6 +10,10 @@ const url = `https://www.nhm.ac.uk/discover/dino-directory/name/name-az-all.html
 
   try {
     generateOutDir();
+
+    chalkAnimation.rainbow("Lorem ipsum dolor sit amet");
+
+    await delay(2000);
 
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
